@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Klif</title>
+  <meta name="description" content="Klif is a free desktop sideloader for iPhone and iPad that shows when each sideloaded app expires and puts reminders in your calendar.">
+  <link rel="icon" type="image/svg+xml" href="klif.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --chalk: #f3f6f5;
+      --paper: #ffffff;
+      --sea: #0d4f6b;
+      --moss: #1f8f5f;
+      --amber: #e8a317;
+      --flare: #d93f44;
+      --ink: #15252d;
+      --muted: #4f6168;
+      --line: #d5dfdd;
+      --ledge: #c9d6d2;
+      --focus: #0d4f6b;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --chalk: #0f1c21;
+        --paper: #142731;
+        --sea: #7cc7e6;
+        --moss: #4cc38a;
+        --amber: #f5bd45;
+        --flare: #f26b6f;
+        --ink: #e7efed;
+        --muted: #9fb2b6;
+        --line: #26404a;
+        --ledge: #2c4a55;
+        --focus: #7cc7e6;
+      }
+    }
+    :root[data-theme="dark"] {
+      --chalk: #0f1c21;
+      --paper: #142731;
+      --sea: #7cc7e6;
+      --moss: #4cc38a;
+      --amber: #f5bd45;
+      --flare: #f26b6f;
+      --ink: #e7efed;
+      --muted: #9fb2b6;
+      --line: #26404a;
+      --ledge: #2c4a55;
+      --focus: #7cc7e6;
+    }
+
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      background: var(--chalk);
+      color: var(--ink);
+      font-family: "Schibsted Grotesk", system-ui, sans-serif;
+      font-size: 1.0625rem;
+      line-height: 1.55;
+    }
+    a { color: var(--sea); text-underline-offset: 0.18em; }
+    a:focus-visible, button:focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 3px;
+      border-radius: 6px;
+    }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px; }
+    @media (min-width: 720px) { .wrap { padding: 0 32px; } }
+
+    /* Header */
+    .top {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-top: 22px; padding-bottom: 22px;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none; font-weight: 800; font-size: 1.25rem; letter-spacing: -0.01em; }
+    .brand img { width: 34px; height: 34px; }
+    .top nav { display: flex; gap: 20px; font-weight: 500; }
+    .top nav a { color: var(--ink); text-decoration: none; }
+    .top nav a:hover { color: var(--sea); }
+
+    /* Hero */
+    .hero { padding-top: 40px; padding-bottom: 24px; }
+    h1 {
+      font-size: clamp(2.4rem, 7vw, 4.6rem);
+      line-height: 0.98;
+      letter-spacing: -0.035em;
+      font-weight: 800;
+      margin: 0 0 22px;
+      max-width: 13ch;
+    }
+    .lede { font-size: 1.2rem; color: var(--muted); max-width: 54ch; margin: 0 0 30px; }
+    .cta-row { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--sea); color: var(--chalk);
+      font: inherit; font-weight: 600; font-size: 1.05rem;
+      padding: 14px 22px; border-radius: 10px; border: 0;
+      text-decoration: none; cursor: pointer;
+    }
+    .btn:hover { filter: brightness(1.1); }
+    .btn small { font-weight: 400; opacity: 0.8; font-size: 0.85rem; }
+    .cta-note { color: var(--muted); font-size: 0.95rem; }
+
+    /* The cliff */
+    .cliff-figure { margin: 64px 0 0; }
+    .cliff {
+      --stop: 4.55;
+      position: relative;
+      padding-top: 118px;
+      padding-right: 12%;
+    }
+    .ledge {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      border-top: 6px solid var(--ink);
+    }
+    .day {
+      height: 64px;
+      border-right: 1px solid var(--line);
+      background: var(--ledge);
+      position: relative;
+    }
+    .day:nth-child(6) { background: color-mix(in srgb, var(--amber) 30%, var(--ledge)); }
+    .day:nth-child(7) { background: color-mix(in srgb, var(--flare) 30%, var(--ledge)); border-right: 0; }
+    .day span {
+      position: absolute; left: 8px; bottom: 8px;
+      font-size: 0.85rem; font-weight: 600; color: var(--ink); opacity: 0.75;
+    }
+    /* drop past day 7 */
+    .drop {
+      position: absolute; right: 0; top: 112px; width: 12%; height: 150px;
+      border-left: 6px solid var(--ink);
+      background:
+        repeating-linear-gradient(180deg, transparent 0 22px, color-mix(in srgb, var(--sea) 18%, transparent) 22px 24px);
+    }
+    .drop::after {
+      content: "Expired";
+      position: absolute; left: 14px; top: 8px;
+      font-weight: 600; font-size: 0.9rem; color: var(--flare);
+    }
+    .base { height: 86px; background: linear-gradient(var(--ledge), transparent); margin-right: 12%; }
+
+    .app {
+      position: absolute; top: 74px; left: 0;
+      transform: translateX(-4px);
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--paper); color: var(--ink);
+      border: 2px solid var(--ink); border-radius: 12px;
+      padding: 5px 10px 5px 6px; font-weight: 600; font-size: 0.9rem;
+      white-space: nowrap;
+    }
+    .app i {
+      display: block; width: 22px; height: 22px; border-radius: 6px;
+      background: linear-gradient(135deg, var(--moss), var(--sea));
+    }
+    .pin {
+      position: absolute;
+      transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center;
+      font-size: 0.85rem; font-weight: 600; white-space: nowrap;
+    }
+    .pin b {
+      background: var(--amber); color: #2a1d00;
+      padding: 3px 9px; border-radius: 999px; font-weight: 600;
+    }
+    .pin::after { content: ""; width: 2px; background: var(--amber); flex: 1; }
+    .pin.p2 { left: calc(88% * 5 / 7); top: 0; height: 118px; }
+    .pin.p1 { left: calc(88% * 6 / 7); top: 30px; height: 88px; }
+    .pin.p6 { left: calc(88% * 6.75 / 7); top: 60px; height: 58px; }
+    .pin.p6 b { background: #f28a1d; }
+    .pin.p6::after { background: #f28a1d; }
+    .legend { display: flex; justify-content: space-between; margin-right: 12%; margin-top: 10px; color: var(--muted); font-size: 0.9rem; }
+    figcaption { color: var(--muted); font-size: 0.95rem; margin-top: 18px; max-width: 60ch; }
+
+    @media (max-width: 560px) {
+      .cliff { padding-top: 132px; --stop: 2.4; }
+      .app { top: 88px; }
+      .pin { font-size: 0.7rem; }
+      .pin b { padding: 3px 7px; }
+      .pin.p2 { height: 132px; }
+      .pin.p1 { top: 36px; height: 96px; }
+      .pin.p6 { top: 72px; height: 60px; }
+      .day span { font-size: 0.75rem; left: 4px; }
+      .drop { top: 126px; }
+      .drop::after { left: auto; right: 0; top: -28px; font-size: 0.75rem; }
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .app { animation: slide 1.8s cubic-bezier(.2,.7,.2,1) 0.3s both; }
+      .pin { animation: pop 0.35s ease-out both; }
+      .pin.p2 { animation-delay: 1.7s; }
+      .pin.p1 { animation-delay: 1.95s; }
+      .pin.p6 { animation-delay: 2.2s; }
+    }
+    .app.done { left: calc(88% * var(--stop) / 7); }
+    @keyframes slide { from { left: 0; } to { left: calc(88% * var(--stop) / 7); } }
+    @keyframes pop { from { opacity: 0; transform: translate(-50%, 6px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+    /* Sections */
+    section.block { padding-top: 88px; }
+    h2 { font-size: clamp(1.7rem, 3.6vw, 2.4rem); letter-spacing: -0.025em; line-height: 1.1; margin: 0 0 14px; font-weight: 800; }
+    h3 { font-size: 1.2rem; margin: 0 0 6px; letter-spacing: -0.01em; }
+    .intro { color: var(--muted); max-width: 60ch; margin: 0 0 34px; }
+
+    .steps { list-style: none; padding: 0; margin: 0; display: grid; gap: 30px; counter-reset: step; }
+    @media (min-width: 820px) { .steps { grid-template-columns: repeat(3, 1fr); gap: 36px; } }
+    .steps li { counter-increment: step; border-top: 2px solid var(--ink); padding-top: 16px; }
+    .steps li::before {
+      content: counter(step);
+      display: block; font-weight: 800; font-size: 2.4rem; line-height: 1; margin-bottom: 12px; color: var(--sea);
+    }
+    .steps p { margin: 0; color: var(--muted); max-width: 40ch; }
+
+    /* Download panel */
+    .panel { background: var(--paper); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+    .tabs { display: flex; border-bottom: 1px solid var(--line); overflow-x: auto; }
+    .tab {
+      font: inherit; font-weight: 600; font-size: 1rem;
+      background: none; border: 0; color: var(--muted);
+      padding: 16px 22px; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -1px;
+      white-space: nowrap;
+    }
+    .tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--sea); }
+    .tab:focus-visible { outline-offset: -3px; }
+    .pane { padding: 26px 22px 30px; }
+    @media (min-width: 720px) { .pane { padding: 32px 34px 36px; display: grid; grid-template-columns: 1fr 1.2fr; gap: 40px; } }
+    .pane[hidden] { display: none; }
+    .files { display: flex; flex-direction: column; gap: 10px; margin: 16px 0 0; }
+    .file {
+      display: flex; justify-content: space-between; align-items: center; gap: 12px;
+      padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px;
+      color: var(--ink); text-decoration: none; font-weight: 600;
+    }
+    .file:hover { border-color: var(--sea); }
+    .file span { font-weight: 400; color: var(--muted); font-size: 0.9rem; }
+    .file.primary { background: var(--sea); color: var(--chalk); border-color: var(--sea); }
+    .file.primary span { color: var(--chalk); opacity: 0.8; }
+    .req { color: var(--muted); margin: 6px 0 0; }
+    .how { margin-top: 28px; }
+    @media (min-width: 720px) { .how { margin-top: 0; } }
+    .how ol { margin: 8px 0 0; padding-left: 1.2em; }
+    .how li { margin-bottom: 8px; }
+    .how li::marker { color: var(--sea); font-weight: 600; }
+    code {
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 0.88em; background: color-mix(in srgb, var(--sea) 10%, transparent);
+      padding: 2px 6px; border-radius: 5px; overflow-wrap: anywhere;
+    }
+    .status { margin: 0 0 18px; color: var(--muted); font-size: 0.95rem; }
+    .status strong { color: var(--ink); }
+
+    /* Good to know */
+    .facts { display: grid; gap: 26px 48px; }
+    @media (min-width: 820px) { .facts { grid-template-columns: 1fr 1fr; } }
+    .facts div { border-left: 3px solid var(--amber); padding-left: 16px; }
+    .facts p { margin: 0; color: var(--muted); }
+
+    footer { margin-top: 110px; border-top: 1px solid var(--line); padding: 30px 0 50px; color: var(--muted); font-size: 0.95rem; }
+    footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; }
+    footer p { margin: 0; max-width: 62ch; }
+    footer nav { display: flex; gap: 18px; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+  <header class="wrap top">
+    <a class="brand" href="./"><img src="klif.svg" alt="">Klif</a>
+    <nav>
+      <a href="#download">Download</a>
+      <a href="https://github.com/LeonardSEO/klif">GitHub</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="wrap hero">
+      <h1>Never lose a sideloaded app to the 7-day limit.</h1>
+      <p class="lede">Klif is a free desktop app for Mac, Windows and Linux. It installs SideStore and IPA files on your iPhone, shows when each app expires, and puts reminders in your calendar before that happens.</p>
+      <div class="cta-row">
+        <a class="btn" id="hero-download" href="#download">Download Klif</a>
+        <span class="cta-note" id="hero-note">Free and open source</span>
+      </div>
+
+      <figure class="cliff-figure">
+        <div class="cliff" aria-hidden="true">
+          <div class="pin p2"><b>2 days left</b></div>
+          <div class="pin p1"><b>1 day left</b></div>
+          <div class="pin p6"><b>6 hours</b></div>
+          <div class="app" id="app-chip"><i></i>NOOP</div>
+          <div class="ledge">
+            <div class="day"><span>Day 1</span></div>
+            <div class="day"><span>2</span></div>
+            <div class="day"><span>3</span></div>
+            <div class="day"><span>4</span></div>
+            <div class="day"><span>5</span></div>
+            <div class="day"><span>6</span></div>
+            <div class="day"><span>7</span></div>
+          </div>
+          <div class="drop"></div>
+          <div class="base"></div>
+        </div>
+        <figcaption>An app signed with a free Apple ID stops opening after 7 days. Klif reminds you 2 days, 1 day and 6 hours before, so you can refresh it in time.</figcaption>
+      </figure>
+    </section>
+
+    <section class="wrap block" id="how">
+      <h2>How it works</h2>
+      <p class="intro">Set it up once, then let your calendar do the remembering.</p>
+      <ol class="steps">
+        <li>
+          <h3>Connect your iPhone</h3>
+          <p>Plug it into your computer with a cable and open Klif. After the first time, Wi-Fi works too.</p>
+        </li>
+        <li>
+          <h3>See what expires when</h3>
+          <p>Open Expiry Overview. Klif reads the expiry date of every sideloaded app straight from your device, without signing in.</p>
+        </li>
+        <li>
+          <h3>Add reminders to your calendar</h3>
+          <p>Click Add reminders to calendar and open the file. Your phone, laptop and watch will remind you to refresh.</p>
+        </li>
+      </ol>
+    </section>
+
+    <section class="wrap block" id="download">
+      <h2>Download</h2>
+      <p class="status" id="release-status">Checking for the latest release…</p>
+
+      <div class="panel">
+        <div class="tabs" role="tablist" aria-label="Operating system">
+          <button class="tab" role="tab" id="tab-mac" aria-controls="pane-mac" aria-selected="true">macOS</button>
+          <button class="tab" role="tab" id="tab-win" aria-controls="pane-win" aria-selected="false" tabindex="-1">Windows</button>
+          <button class="tab" role="tab" id="tab-linux" aria-controls="pane-linux" aria-selected="false" tabindex="-1">Linux</button>
+        </div>
+
+        <div class="pane" id="pane-mac" role="tabpanel" aria-labelledby="tab-mac">
+          <div>
+            <h3>Klif for macOS</h3>
+            <p class="req">macOS 11 or later. Works on Apple silicon and Intel. Nothing else to install.</p>
+            <div class="files" data-os="mac"></div>
+          </div>
+          <div class="how">
+            <h3>Install</h3>
+            <ol>
+              <li>Open the downloaded <code>.dmg</code> and drag Klif to Applications.</li>
+              <li>Open Klif. macOS will say it can't check the app, because Klif isn't notarized by Apple yet.</li>
+              <li>Go to System Settings, then Privacy &amp; Security, and click <strong>Open Anyway</strong> next to Klif.</li>
+              <li>If macOS says the app is damaged, run this in Terminal and open it again:<br><code>xattr -dr com.apple.quarantine /Applications/Klif.app</code></li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="pane" id="pane-win" role="tabpanel" aria-labelledby="tab-win" hidden>
+          <div>
+            <h3>Klif for Windows</h3>
+            <p class="req">Windows 10 or 11. Klif needs <a href="https://apple.co/ms">iTunes</a> installed to talk to your iPhone.</p>
+            <div class="files" data-os="win"></div>
+          </div>
+          <div class="how">
+            <h3>Install</h3>
+            <ol>
+              <li>Install <a href="https://apple.co/ms">iTunes</a> if you don't have it.</li>
+              <li>Run the downloaded installer.</li>
+              <li>If Windows shows "Windows protected your PC", click <strong>More info</strong>, then <strong>Run anyway</strong>. Klif isn't code-signed yet.</li>
+              <li>Open Klif from the Start menu and plug in your iPhone.</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="pane" id="pane-linux" role="tabpanel" aria-labelledby="tab-linux" hidden>
+          <div>
+            <h3>Klif for Linux</h3>
+            <p class="req">x86_64 and ARM64. Klif needs <code>usbmuxd</code>, which most distributions already include.</p>
+            <div class="files" data-os="linux"></div>
+          </div>
+          <div class="how">
+            <h3>Install</h3>
+            <ol>
+              <li>Make sure usbmuxd is installed, for example <code>sudo apt install usbmuxd</code> or <code>sudo dnf install usbmuxd</code>.</li>
+              <li>Install the <code>.deb</code> or <code>.rpm</code> with your package manager, or use the AppImage: <code>chmod +x Klif*.AppImage</code> and run it.</li>
+              <li>On NixOS, run <code>nix run github:LeonardSEO/klif</code>.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap block" id="good-to-know">
+      <h2>Good to know</h2>
+      <p class="intro">What Klif does and doesn't do, so there are no surprises.</p>
+      <div class="facts">
+        <div>
+          <h3>The 7 days stay 7 days</h3>
+          <p>Apple sets that limit for free accounts and nothing removes it. Klif makes sure you know in time. Refresh in SideStore, or reinstall with Klif.</p>
+        </div>
+        <div>
+          <h3>Export again after a refresh</h3>
+          <p>Each refresh gives the app a new expiry date. Add the reminders again afterwards so your calendar stays correct.</p>
+        </div>
+        <div>
+          <h3>Your Apple ID stays on your computer</h3>
+          <p>Klif only signs in to Apple to install apps, and stores your login in your system keychain. Reading expiry dates needs no sign-in, and nothing is sent to us.</p>
+        </div>
+        <div>
+          <h3>Early software</h3>
+          <p>Klif is new and builds aren't signed yet. Found a problem? <a href="https://github.com/LeonardSEO/klif/issues">Report it on GitHub</a>.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <p>Klif is a fork of <a href="https://github.com/nab138/iloader">iloader</a> by nab138, and is not affiliated with or endorsed by iloader. Source code under the MIT License.</p>
+      <nav>
+        <a href="https://github.com/LeonardSEO/klif">Source code</a>
+        <a href="https://github.com/LeonardSEO/klif/issues">Report a problem</a>
+        <a href="https://github.com/LeonardSEO/klif/releases">All releases</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      var REPO = "LeonardSEO/klif";
+      var RELEASES = "https://github.com/" + REPO + "/releases";
+
+      // Tabs
+      var tabs = Array.prototype.slice.call(document.querySelectorAll(".tab"));
+      function select(tab) {
+        tabs.forEach(function (t) {
+          var on = t === tab;
+          t.setAttribute("aria-selected", on ? "true" : "false");
+          t.tabIndex = on ? 0 : -1;
+          document.getElementById(t.getAttribute("aria-controls")).hidden = !on;
+        });
+      }
+      tabs.forEach(function (tab, i) {
+        tab.addEventListener("click", function () { select(tab); });
+        tab.addEventListener("keydown", function (e) {
+          var next = e.key === "ArrowRight" ? i + 1 : e.key === "ArrowLeft" ? i - 1 : null;
+          if (next === null) return;
+          var t = tabs[(next + tabs.length) % tabs.length];
+          select(t); t.focus(); e.preventDefault();
+        });
+      });
+
+      // Detect the visitor's OS
+      var ua = navigator.userAgent;
+      var os = /Windows/.test(ua) ? "win" : /Mac/.test(ua) && !/iPhone|iPad/.test(ua) ? "mac" : /Linux|X11/.test(ua) && !/Android/.test(ua) ? "linux" : null;
+      var osName = { mac: "macOS", win: "Windows", linux: "Linux" };
+      if (os) select(document.getElementById("tab-" + os));
+
+      // Settle the hero animation on its end state once it has run
+      var chip = document.getElementById("app-chip");
+      chip.addEventListener("animationend", function () { chip.classList.add("done"); });
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) chip.classList.add("done");
+
+      function sizeLabel(bytes) { return (bytes / 1048576).toFixed(0) + " MB"; }
+
+      function link(asset, label, primary) {
+        var a = document.createElement("a");
+        a.className = "file" + (primary ? " primary" : "");
+        a.href = asset.browser_download_url;
+        a.textContent = label;
+        var s = document.createElement("span");
+        s.textContent = sizeLabel(asset.size);
+        a.appendChild(s);
+        return a;
+      }
+
+      function pick(assets, test) {
+        for (var i = 0; i < assets.length; i++) if (test(assets[i].name)) return assets[i];
+        return null;
+      }
+
+      function noRelease(message) {
+        document.getElementById("release-status").innerHTML =
+          message + ' Until then, <a href="https://github.com/' + REPO + '#building-from-source">build Klif from source</a>.';
+        document.querySelectorAll(".files").forEach(function (box) {
+          var a = document.createElement("a");
+          a.className = "file";
+          a.href = RELEASES;
+          a.textContent = "View releases on GitHub";
+          box.appendChild(a);
+        });
+      }
+
+      fetch("https://api.github.com/repos/" + REPO + "/releases/latest", { headers: { Accept: "application/vnd.github+json" } })
+        .then(function (r) {
+          if (r.status === 404) throw new Error("none");
+          if (!r.ok) throw new Error("http");
+          return r.json();
+        })
+        .then(function (release) {
+          var assets = release.assets || [];
+          var arm = function (n) { return /aarch64|arm64/i.test(n); };
+          var groups = {
+            mac: [
+              [pick(assets, function (n) { return /\.dmg$/i.test(n); }), "Download .dmg", true]
+            ],
+            win: [
+              [pick(assets, function (n) { return /setup\.exe$|\.exe$/i.test(n); }), "Download installer (.exe)", true],
+              [pick(assets, function (n) { return /\.msi$/i.test(n); }), "Download .msi", false]
+            ],
+            linux: [
+              [pick(assets, function (n) { return /\.deb$/i.test(n) && !arm(n); }), "Ubuntu / Debian (.deb)", true],
+              [pick(assets, function (n) { return /\.rpm$/i.test(n) && !arm(n); }), "Fedora / RHEL (.rpm)", false],
+              [pick(assets, function (n) { return /\.AppImage$/i.test(n) && !arm(n); }), "AppImage", false],
+              [pick(assets, function (n) { return /\.deb$/i.test(n) && arm(n); }), "Debian ARM64 (.deb)", false],
+              [pick(assets, function (n) { return /\.rpm$/i.test(n) && arm(n); }), "Fedora ARM64 (.rpm)", false],
+              [pick(assets, function (n) { return /\.AppImage$/i.test(n) && arm(n); }), "AppImage ARM64", false]
+            ]
+          };
+          Object.keys(groups).forEach(function (key) {
+            var box = document.querySelector('.files[data-os="' + key + '"]');
+            var any = false;
+            groups[key].forEach(function (g) { if (g[0]) { box.appendChild(link(g[0], g[1], g[2])); any = true; } });
+            if (!any) {
+              var a = document.createElement("a");
+              a.className = "file"; a.href = release.html_url; a.textContent = "See all files for this release";
+              box.appendChild(a);
+            }
+          });
+
+          var version = release.tag_name.replace(/^v/, "");
+          var status = document.getElementById("release-status");
+          status.textContent = "";
+          var strong = document.createElement("strong");
+          strong.textContent = "Version " + version;
+          status.appendChild(strong);
+          status.appendChild(document.createTextNode(", released " + new Date(release.published_at).toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" }) + ". "));
+          var notes = document.createElement("a");
+          notes.href = release.html_url; notes.textContent = "Release notes";
+          status.appendChild(notes);
+
+          if (os) {
+            var primary = groups[os][0][0];
+            var hero = document.getElementById("hero-download");
+            if (primary) {
+              hero.href = primary.browser_download_url;
+              hero.textContent = "Download for " + osName[os];
+              document.getElementById("hero-note").textContent = "Version " + version + ", free and open source";
+            }
+          }
+        })
+        .catch(function (e) {
+          noRelease(e.message === "none" ? "There is no release yet." : "Couldn't load the latest release.");
+        });
+    })();
+  </script>
+</body>
+</html>

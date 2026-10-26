@@ -4,6 +4,8 @@
 
 **A desktop sideloader for iPhone and iPad that warns you before your apps expire.**
 
+[Download](https://leonardseo.github.io/klif/) · [Releases](https://github.com/LeonardSEO/klif/releases) · [Report a problem](https://github.com/LeonardSEO/klif/issues)
+
 <br clear="left">
 
 ---
@@ -37,19 +39,47 @@ Klif is early-stage software.
 
 - The expiry overview and calendar export are covered by unit tests, and reading profiles over `misagent` has been checked against a real device.
 - The overview has **not yet been tested on a device with sideloaded apps installed**. Feedback from people who use SideStore every day is very welcome.
-- There are no prebuilt releases yet, so build from source (see below). Automatic updates are switched off until signed Klif releases exist.
+- Builds are not yet signed by Apple or Microsoft, so your system warns you the first time you open Klif. The [install steps](#install) explain how to continue. Automatic updates are switched off until signed releases exist.
+
+## Install
+
+Download Klif from **[leonardseo.github.io/klif](https://leonardseo.github.io/klif/)**, which picks the right file for your system, or from the [Releases page](https://github.com/LeonardSEO/klif/releases).
+
+| Platform | File | Needs |
+| --- | --- | --- |
+| macOS 11+ (Apple silicon and Intel) | `.dmg` | Nothing |
+| Windows 10/11 | `.exe` installer | [iTunes](https://apple.co/ms) |
+| Linux x86_64 / ARM64 | `.deb`, `.rpm` or `.AppImage` | `usbmuxd` (usually preinstalled) |
+
+### macOS
+
+1. Open the `.dmg` and drag Klif to Applications.
+2. Open Klif. macOS says it can't check the app, because Klif isn't notarized yet.
+3. Go to **System Settings → Privacy & Security** and click **Open Anyway** next to Klif.
+4. If macOS says the app is damaged, run this and open Klif again:
+
+   ```bash
+   xattr -dr com.apple.quarantine /Applications/Klif.app
+   ```
+
+### Windows
+
+1. Install [iTunes](https://apple.co/ms) if you don't have it. Klif uses it to talk to your iPhone.
+2. Run the installer.
+3. If you see "Windows protected your PC", click **More info**, then **Run anyway**.
+
+### Linux
+
+1. Make sure usbmuxd is installed, for example `sudo apt install usbmuxd` or `sudo dnf install usbmuxd`.
+2. Install the `.deb` or `.rpm` with your package manager, or make the AppImage executable with `chmod +x Klif*.AppImage` and run it.
+3. On NixOS, run `nix run github:LeonardSEO/klif`.
 
 ## How to use
 
-1. Install usbmuxd for your platform:
-   - **Windows:** install [iTunes](https://apple.co/ms)
-   - **macOS:** already included
-   - **Linux:** often included; otherwise install it with your package manager
-2. [Build Klif from source](#building-from-source).
-3. Plug your iPhone or iPad into your computer and open Klif.
-4. Select your device. To install apps, also sign in with your Apple ID.
-5. Open **Expiry Overview** in the sidebar to see when your apps expire.
-6. Click **Add reminders to calendar** and open the saved `.ics` file in your calendar app.
+1. Plug your iPhone or iPad into your computer and open Klif.
+2. Select your device. To install apps, also sign in with your Apple ID.
+3. Open **Expiry Overview** in the sidebar to see when your apps expire.
+4. Click **Add reminders to calendar** and open the saved `.ics` file in your calendar app.
 
 Export the file again after each refresh or reinstall, because a refreshed app gets a new expiry date.
 
@@ -64,8 +94,6 @@ Export the file again after each refresh or reinstall, because a refreshed app g
 | Develop with hot reload | `bun tauri dev` |
 | Production build | `bun tauri build` |
 | Run the Rust tests | `cd src-tauri && cargo test --lib` |
-
-NixOS users can use the flake: `nix run github:LeonardSEO/klif`.
 
 ## Troubleshooting
 
