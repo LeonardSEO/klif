@@ -1,4 +1,4 @@
-name: "Build iloader"
+name: "Build Klif"
 
 on:
   push:
@@ -51,9 +51,9 @@ jobs:
             ~/.cargo/git
             src-tauri/target
             node_modules
-          key: ${{ matrix.platform }}-iloader-${{ hashFiles('**/Cargo.lock', 'package-lock.json') }}
+          key: ${{ matrix.platform }}-klif-${{ hashFiles('**/Cargo.lock', 'package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-iloader-
+            ${{ runner.os }}-klif-
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable

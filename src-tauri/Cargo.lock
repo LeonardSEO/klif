@@ -2618,40 +2618,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "iloader"
-version = "2.4.0"
-dependencies = [
- "chrono",
- "futures",
- "idevice",
- "isideload",
- "keyring",
- "once_cell",
- "plist",
- "plist-macro",
- "reqwest",
- "rootcause",
- "rustls",
- "serde",
- "serde_json",
- "strum",
- "tauri",
- "tauri-build",
- "tauri-plugin-dialog",
- "tauri-plugin-opener",
- "tauri-plugin-process",
- "tauri-plugin-store",
- "tauri-plugin-updater",
- "thiserror 2.0.21",
- "tokio",
- "tokio-util",
- "tracing",
- "tracing-appender",
- "tracing-subscriber",
- "uuid",
-]
-
-[[package]]
 name = "indexmap"
 version = "1.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3054,6 +3020,40 @@ dependencies = [
  "security-framework 3.7.0",
  "windows-sys 0.60.2",
  "zeroize",
+]
+
+[[package]]
+name = "klif"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "futures",
+ "idevice",
+ "isideload",
+ "keyring",
+ "once_cell",
+ "plist",
+ "plist-macro",
+ "reqwest",
+ "rootcause",
+ "rustls",
+ "serde",
+ "serde_json",
+ "strum",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-dialog",
+ "tauri-plugin-opener",
+ "tauri-plugin-process",
+ "tauri-plugin-store",
+ "tauri-plugin-updater",
+ "thiserror 2.0.21",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "tracing-appender",
+ "tracing-subscriber",
+ "uuid",
 ]
 
 [[package]]

@@ -21,9 +21,9 @@ import { Certificates } from "./pages/Certificates";
 import { AppIds } from "./pages/AppIds";
 import { Settings } from "./pages/Settings";
 import { Pairing } from "./pages/Pairing";
+import { Expiry } from "./pages/Expiry";
 import { getVersion } from "@tauri-apps/api/app";
-import { checkForUpdates } from "./update";
-import logo from "./iloader.svg";
+import logo from "./klif.svg";
 import { GlassCard } from "./components/GlassCard";
 import { useTranslation } from "react-i18next";
 import { usePlatform } from "./PlatformContext";
@@ -37,7 +37,7 @@ function App() {
   const [loggedInAs, setLoggedInAs] = useState<string | null>(null);
   const [selectedDevice, setSelectedDevice] = useState<DeviceInfo | null>(null);
   const [openModal, setOpenModal] = useState<
-    null | "certificates" | "appids" | "pairing"
+    null | "certificates" | "appids" | "pairing" | "expiry"
   >(null);
   const [version, setVersion] = useState<string>("");
 
@@ -68,9 +68,6 @@ function App() {
     fetchVersion();
   }, []);
 
-  useEffect(() => {
-    checkForUpdates();
-  }, []);
 
   const shortcutLabel = useCallback(
     (mac: string, windows: string, linux?: string) => {
@@ -185,7 +182,7 @@ function App() {
           <div className="title-block">
             <img src={logo} alt={t("app.logo_alt")} className="logo" />
             <div>
-              <h1 className="title">iloader</h1>
+              <h1 className="title">Klif</h1>
               <p className="subtitle">{t("subtitle")}</p>
             </div>
           </div>
@@ -211,7 +208,7 @@ function App() {
             className="toolbar-button"
             onClick={async () => {
               try {
-                await openUrl("https://github.com/nab138/iloader");
+                await openUrl("https://github.com/LeonardSEO/klif");
               } catch (error) {
                 console.error("Failed to open GitHub link", error);
                 toast.error(t("app.open_github_failed"));
@@ -285,6 +282,15 @@ function App() {
                 <span aria-hidden="true">
                   {shortcutLabel("⌘⇧A", "Ctrl+Shift+A")}
                 </span>
+              </button>
+              <button
+                className="workspace-list-item"
+                onClick={() => {
+                  if (!ensureSelectedDevice()) return;
+                  setOpenModal("expiry");
+                }}
+              >
+                {t("app.expiry")}
               </button>
             </div>
           </section>
@@ -428,6 +434,9 @@ function App() {
       </Modal>
       <Modal isOpen={openModal === "pairing"} close={() => setOpenModal(null)}>
         <Pairing />
+      </Modal>
+      <Modal isOpen={openModal === "expiry"} close={() => setOpenModal(null)}>
+        <Expiry />
       </Modal>
     </main>
   );

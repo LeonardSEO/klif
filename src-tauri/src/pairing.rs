@@ -122,7 +122,7 @@ async fn generate_rppairing_plist(
 
 fn new_host_label() -> String {
     let id = uuid::Uuid::new_v4().simple().to_string();
-    format!("iloader-{}", &id[..6])
+    format!("klif-{}", &id[..6])
 }
 
 fn host_label(app: &AppHandle, udid: &str) -> Result<String, AppError> {

@@ -9,6 +9,7 @@ mod pairing;
 #[macro_use]
 mod secure_storage;
 mod error;
+mod expiry;
 mod logging;
 mod operation;
 
@@ -24,6 +25,7 @@ use crate::{
         delete_stored_rppairing, export_pairing_cmd, has_stored_rppairing, installed_pairing_apps,
         place_pairing_cmd,
     },
+    expiry::{export_expiry_calendar, list_installed_profiles},
     secure_storage::{force_disable_keyring, keyring_available},
     sideload::{SideloaderMutex, install_sidestore_operation, sideload_operation},
 };
@@ -49,7 +51,7 @@ pub fn run() {
 
             let file_appender = tracing_appender::rolling::RollingFileAppender::builder()
                 .rotation(tracing_appender::rolling::Rotation::DAILY)
-                .filename_prefix("iloader")
+                .filename_prefix("klif")
                 .filename_suffix("log")
                 .max_log_files(2)
                 .build(&log_dir)
@@ -126,6 +128,8 @@ pub fn run() {
             force_disable_keyring,
             cancel_pairing,
             has_stored_rppairing,
+            list_installed_profiles,
+            export_expiry_calendar,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

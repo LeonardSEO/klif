@@ -44,7 +44,8 @@
     "must_be_logged_in": "Je moet ingelogd zijn!",
     "must_select_device": "Je moet een apparaat selecteren!",
     "ipa_files": "IPA Bestanden",
-    "logo_alt": "iloader logo"
+    "logo_alt": "Klif logo",
+    "expiry": "Verloopoverzicht"
   },
   "apple_id": {
     "title": "Apple ID",
@@ -75,7 +76,7 @@
     "valid_6digit": "Voer een geldige 6-cijferige code in.",
     "submit": "Verzenden",
     "max_certs_title": "Maximum aantal certificaten bereikt",
-    "max_certs_desc": "iloader zal je bestaande certificaten intrekken en een nieuw certificaat genereren.",
+    "max_certs_desc": "Klif zal je bestaande certificaten intrekken en een nieuw certificaat genereren.",
     "hide_certificate_list": "Verberg certificaatlijst",
     "choose_what_to_revoke": "Kies welke certificaten je wilt intrekken",
     "continue": "Doorgaan",
@@ -197,7 +198,7 @@
     "stored_rppairing_deleted_success": "Opgeslagen koppeling succesvol verwijderd!",
     "failed_delete_stored_rppairing": "Kon opgeslagen koppeling niet verwijderen",
     "dont_use_keyring": "Sleutelhanger niet gebruiken",
-    "dont_use_keyring_message": "Het opslaan van koppelingsbestanden, de Anisette-status en certificaten op de harde schijf maakt iloader kwetsbaarder. Gebruik deze optie alleen als de standaard opslag in de sleutelhanger niet werkt en je de risico's begrijpt."
+    "dont_use_keyring_message": "Het opslaan van koppelingsbestanden, de Anisette-status en certificaten op de harde schijf maakt Klif kwetsbaarder. Gebruik deze optie alleen als de standaard opslag in de sleutelhanger niet werkt en je de risico's begrijpt."
   },
   "dialog": {
     "confirm": "Bevestigen",
@@ -266,7 +267,7 @@
         "Probeer de app met verhoogde bevoegdheden uit te voeren (als beheerder/root)."
       ],
       "filesystem": [
-        "Zorg ervoor dat iloader toegang heeft tot het lezen en schrijven van bestanden op je systeem."
+        "Zorg ervoor dat Klif toegang heeft tot het lezen en schrijven van bestanden op je systeem."
       ],
       "not_enough_app_ids": [
         "Je hebt niet genoeg App IDs beschikbaar om deze app te installeren.",
@@ -286,5 +287,29 @@
     "updating": "Updaten...",
     "downloaded_restarting": "Update gedownload! De app herstarten...",
     "failed_download": "Kon de update niet downloaden: {{error}}"
+  },
+  "expiry": {
+    "manage": "Verloopoverzicht",
+    "explanation": "Apps die met een gratis Apple ID zijn gesigneerd openen niet meer zodra hun provisioning-profiel verloopt. Ververs ze voordat dat gebeurt.",
+    "loading": "Provisioning-profielen uitlezen...",
+    "loaded_success": "Provisioning-profielen geladen!",
+    "failed_load": "Kon provisioning-profielen niet uitlezen",
+    "none_found": "Geen gesideloade apps gevonden op dit toestel.",
+    "name": "Naam",
+    "expires": "Verloopt",
+    "time_left": "Resterend",
+    "expired": "Verlopen",
+    "hours_left_one": "Nog {{count}} uur",
+    "hours_left_other": "Nog {{count}} uur",
+    "days_left_one": "Nog {{count}} dag",
+    "days_left_other": "Nog {{count}} dagen",
+    "export_calendar": "Herinneringen in agenda zetten",
+    "calendar_files": "Agendabestanden",
+    "exporting": "Agendabestand maken...",
+    "exported_success_one": "Agendabestand gemaakt met {{count}} herinnering",
+    "exported_success_other": "Agendabestand gemaakt met {{count}} herinneringen",
+    "failed_export": "Kon agendabestand niet maken",
+    "event_title": "{{name}} verloopt",
+    "event_description": "Open SideStore en ververs deze app voordat hij verloopt, of installeer hem opnieuw met Klif."
   }
 }

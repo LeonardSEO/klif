@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "iloader",
-  "version": "2.4.0",
-  "identifier": "me.nabdev.iloader",
+  "productName": "Klif",
+  "version": "0.1.0",
+  "identifier": "io.github.leonardseo.klif",
   "build": {
     "beforeDevCommand": "bun run dev",
     "devUrl": "http://localhost:1420",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "iloader",
+        "title": "Klif",
         "width": 800,
         "height": 600,
         "minHeight": 300,
@@ -27,14 +27,14 @@
     "updater": {
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEUwRDc0NjBERkEzN0U1MzYKUldRMjVUZjZEVWJYNFA0eWtoOGRyRFBtc3BnN20zWFpzbmVNaiswVmhlNm9GUzFzTjRPYmxSaHIK",
       "endpoints": [
-        "https://github.com/nab138/iloader/releases/latest/download/latest.json"
+        "https://github.com/LeonardSEO/klif/releases/latest/download/latest.json"
       ]
     }
   },
   "bundle": {
     "active": true,
     "targets": "all",
-    "createUpdaterArtifacts": true,
+    "createUpdaterArtifacts": false,
     "category": "Utility",
     "icon": [
       "icons/32x32.png",

@@ -1,70 +1,87 @@
-<a href="https://iloader.app">
-  <picture align="left" >
-    <source media="(prefers-color-scheme: dark)" srcset="/iloader.svg">
-    <img align="left" width="90" height="90" src="/iloader-dark.svg">
-  </picture>
-  
-  <div id="user-content-toc">
-    <ul style="list-style: none;">
-      <summary>
-        <h1>iloader</h1>
-      </summary>
-    </ul>
-  </div>
-</a>
+<img align="left" width="90" height="90" src="/src/klif.svg" alt="Klif logo">
+
+# Klif
+
+**A desktop sideloader for iPhone and iPad that warns you before your apps expire.**
+
+<br clear="left">
 
 ---
 
-[![Build iloader](https://img.shields.io/github/actions/workflow/status/nab138/iloader/build.yml?style=flat&logo=github&logoColor=white&label=Build%20iloader)](https://github.com/nab138/iloader/actions/workflows/build.yml) ![Downloads](https://img.shields.io/endpoint?url=https%3A%2F%2Fgist.githubusercontent.com%2Fnab138%2F28258aff7e3f1d3a3084a21f4cff2e57%2Fraw%2Filoader_downloads.json&style=flat)
-[![Sponsor](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&color=%23fe8e86)](https://github.com/sponsors/nab138)
+Apps you sideload with a free Apple ID stop opening seven days after they were signed. SideStore is supposed to refresh them in the background, but the refresh can fail without telling you: the VPN drops, iOS skips the background task, or the certificate gets revoked. Most people only find out when the app won't open.
 
-Install SideStore (or other apps) and import your pairing file with ease
+Klif shows you exactly when every sideloaded app on your device expires, and puts reminders in the calendar you already use, so they show up on all your devices before the deadline.
 
-**This repository and [iloader.app](https://iloader.app) are the only official ways to download iloader. There is also an unofficial [Homebrew cask](https://formulae.brew.sh/cask/iloader), an unofficial [AUR package](https://aur.archlinux.org/packages/iloader-bin), and an unofficial [Fedora COPR repository](https://copr.fedorainfracloud.org/coprs/anudeepd/iloader) maintained by the community. Do not download from any other sources or websites.**
-
-<img width="1918" height="998" alt="iloader0" src="https://github.com/user-attachments/assets/93cd135d-6d89-46ee-9b9f-12c596806911" />
-
-## How to use
-
-- Install usbmuxd for your platform
-  - Windows: [iTunes](https://apple.co/ms)
-  - macOS: Included
-  - Linux: Potentially included, if not, install via your package manager
-- Install the latest version for your platform from the [releases](https://github.com/nab138/iloader/releases)
-  - NixOS: Use the flake `github:nab138/iloader`
-  - Fedora: Use the .RPM or the unofficial [Fedora COPR repository](https://copr.fedorainfracloud.org/coprs/anudeepd/iloader)
-  - Arch: Use the unofficial [AUR package](https://aur.archlinux.org/packages/iloader-bin),
-- Plug in your iDevice to your computer
-- Open the app
-- Sign into your Apple ID
-- Select your action (e.g. install SideStore)
+> [!NOTE]
+> Klif is a fork of [iloader](https://github.com/nab138/iloader) by [nab138](https://github.com/nab138). It is **not affiliated with or endorsed by** iloader or its author. Please report Klif problems [here](https://github.com/LeonardSEO/klif/issues), not to the iloader project.
 
 ## Features
 
-- Install SideStore (or LiveContainer + SideStore), import certificate and place rppairing+lockdown pairing files automatically
+**New in Klif**
+
+- **Expiry overview.** Lists every provisioning profile on the connected device, with the expiry date and the time left. Each app is colour-coded: green, then yellow at 3 days left, orange at 1 day, red once expired.
+- **Calendar reminders.** One click exports an `.ics` file with an event at each app's expiry time and alerts 2 days, 1 day and 6 hours before. Open the file in Apple Calendar, Google Calendar or Outlook, and the reminders reach your phone, laptop and watch.
+- **No sign-in needed for either.** Expiry dates are read straight from the device over USB or Wi-Fi via `misagent`. Your Apple ID is not used and nothing is sent to a server.
+
+**Inherited from iloader**
+
+- Install SideStore (or LiveContainer + SideStore), import the certificate and place the rppairing and lockdown pairing files automatically
 - Import any IPA
-- Intelligent error suggestions to help resolve common issues
-- Manage pairing files in apps like StikDebug, SideStore, Protokolle, etc
-- See and revoke development certificates & app ids
+- Error suggestions for common problems
+- Manage pairing files in apps like StikDebug, SideStore and Protokolle
+- View and revoke development certificates and App IDs
+
+## Status
+
+Klif is early-stage software.
+
+- The expiry overview and calendar export are covered by unit tests, and reading profiles over `misagent` has been checked against a real device.
+- The overview has **not yet been tested on a device with sideloaded apps installed**. Feedback from people who use SideStore every day is very welcome.
+- There are no prebuilt releases yet, so build from source (see below). Automatic updates are switched off until signed Klif releases exist.
+
+## How to use
+
+1. Install usbmuxd for your platform:
+   - **Windows:** install [iTunes](https://apple.co/ms)
+   - **macOS:** already included
+   - **Linux:** often included; otherwise install it with your package manager
+2. [Build Klif from source](#building-from-source).
+3. Plug your iPhone or iPad into your computer and open Klif.
+4. Select your device. To install apps, also sign in with your Apple ID.
+5. Open **Expiry Overview** in the sidebar to see when your apps expire.
+6. Click **Add reminders to calendar** and open the saved `.ics` file in your calendar app.
+
+Export the file again after each refresh or reinstall, because a refreshed app gets a new expiry date.
+
+## Building from source
+
+1. Install [bun](https://bun.sh) (or [Node.js](https://nodejs.org)) and [Rust](https://www.rust-lang.org/tools/install).
+2. Clone the repository and `cd` into it.
+3. Install dependencies with `bun i` (or `npm i`).
+
+| Task | Command |
+| --- | --- |
+| Develop with hot reload | `bun tauri dev` |
+| Production build | `bun tauri build` |
+| Run the Rust tests | `cd src-tauri && cargo test --lib` |
+
+NixOS users can use the flake: `nix run github:LeonardSEO/klif`.
 
 ## Troubleshooting
 
-- If you are unable to solve an issue on your own, copy the full error message and ask on the [idevice Discord server](https://discord.gg/EA6yVgydBz) or [open an issue](https://github.com/nab138/iloader/issues).
-- You can view app logs with the "View Logs." If nothing is showing up, change the log level to "Debug."
-- If those logs aren't helpful, logs with additional are stored in the following locations:
-  - Windows: `%APPDATA%\me.nabdev.iloader\logs`
-  - macOS: `~/Library/Application Support/me.nabdev.iloader/logs`
-  - Linux: `~/.local/share/me.nabdev.iloader/logs/`
+- Use **View Logs** in the app. If it shows nothing, set the log level to **Debug**.
+- More detailed logs are stored here:
+  - **Windows:** `%APPDATA%\io.github.leonardseo.klif\logs`
+  - **macOS:** `~/Library/Application Support/io.github.leonardseo.klif/logs`
+  - **Linux:** `~/.local/share/io.github.leonardseo.klif/logs/`
+- If you can't solve a problem, [open an issue](https://github.com/LeonardSEO/klif/issues) and include the full error message.
 
 ## Translating
 
-iloader needs localization! If you speak another language and notice iloader does not support it or has mistakes, please consider contributing.
+The expiry overview is available in English and Dutch. All other text comes from iloader's existing translations.
 
-To update/edit an existing language, make a PR modifying `src/locales/<lang>.json`.
-
-To add a new language, add your language to `src/i18next.ts`, and in `src/locales` copy `en.json` to a new file titled `<langcode>.json` and update the strings.
-
-**i18next.ts:**
+- **Fix or update a language:** open a pull request that changes `src/locales/<lang>.json`.
+- **Add a language:** add it to `src/i18next.ts`, copy `src/locales/en.json` to `src/locales/<langcode>.json` and translate the strings.
 
 ```ts
 const languages = [
@@ -74,82 +91,33 @@ const languages = [
 ] as const;
 ```
 
-You can also add your name to the translators section of the README.
-
-Thank you for translating!
-
-## Building from source
-
-1. Install [bun](https://bun.sh) (or [Node.js](https://nodejs.org)) and [Rust](https://www.rust-lang.org/tools/install)
-2. Clone the repository and `cd` into it
-3. Run `bun i` (or `npm i`)
-
-For development with hot reload: `bun tauri dev` (or `npm run tauri dev`)
-Make a production build: `bun tauri build` (or `npm run tauri build`)
-
-## Credits
-
-- Icon made by [Transistor](https://github.com/transistor-exe)
-- UI improved by [StephenDev0](https://github.com/StephenDev0)
-- [idevice](https://github.com/jkcoxson/idevice) by [jkcoxson](https://github.com/jkcoxson) for communicating with iOS devices
-- [isideload](https://github.com/nab138/isideload) for installing apps
-  - [idevice](https://github.com/jkcoxson/idevice) by [jkcoxson](https://github.com/jkcoxson) crate is used to communicate with the device
-  - [apple-codesign-quick](https://github.com/Dadoum/apple-codesign-quick) by [Dadoum](https://github.com/Dadoum) for codesigning and entitlements
-  - [Impactor](https://github.com/claration/Impactor) by [claration](https://github.com/claration) was used as a reference for cryptography operations (converting certs to p12, etc.).
-  - [Sideloader](https://github.com/Dadoum/Sideloader) by [Dadoum](https://github.com/Dadoum) was used as a reference for how apple private developer endpoints work
-- [idevice_pair](https://github.com/jkcoxson/idevice_pair) was used as a reference for pairing file management
-- App made with [tauri](https://tauri.app)
-
-## Translators
-
-Thank you to everyone who has contributed translations! See the [Translating](#translating) section if you would like to contribute as well.
-
-- [By3lish](https://github.com/by3lish): Azerbaijani (az)
-- [TNT-333](https://github.com/TNT-333): German (de)
-- [basketshoe](https://github.com/basketshoe): Italian (it)
-- [baocreata](https://github.com/baocreata): Vietnamese (vt)
-- [IamArayel](https://github.com/IamArayel): French (fr)
-- [kkula9999](https://github.com/kkula9999): Traditional & Simplified Chinese (zh_tw & zh_cn)
-- [sibwaze](https://github.com/sibwaze): Russian (ru)
-- [notmalicik](https://github.com/notmalicik): Română (ro)
-- [mirdukkkkk](https://github.com/mirdukkkkk): Improved Russian (ru)
-- [okinaau](https://github.com/okinaau): Arabic (ar)
-- [ChouChiu](https://github.com/ChouChiu): Cantonese (zh_hk) & Improved Chinese (zh_tw & zh_cn)
-- [marcinmajsc](https://github.com/marcinmajsc): Polish (pl)
-- [ern775](https://github.com/ern775): Turkish (tr)
-- [canpng](https://github.com/canpng): Improved Turkish (tr)
-- [jazoppix](https://github.com/jazoppix): Spanish (es)
-- [eseiker](https://github.com/eseiker): Korean (ko)
-- [seomin0610](https://github.com/seomin0610): Improved Korean (ko)
-- [Ordyan777](https://github.com/Ordyan777): Armenian (am)
-- [kakik0u](https://github.com/kakik0u): Japanese (ja)
-- [lkspodmol](https://github.com/lkspodmol): Czech (cs_cz)
-- [marcusherelammonstyle-cmd](https://github.com/marcusherelammonstyle-cmd): Swedish (sv)
-- [MCI49312](https://github.com/MCI49312): Hungarian (hu)
-- [Kynonim](https://github.com/Kynonim): Indonesian (id)
-- [DD00031](https://github.com/DD00031): Dutch (nl)
-- [Toritan123](https://github.com/Toritan123): Improved Japanese (ja)
-- [marcinmajsc](https://github.com/marcinmajsc): Improved Polish (pl)
-- [dleiferives](https://github.com/dleiferives): Greek (el)
-- [ShadowWLX](https://github.com/ShadowWLX): Improved French (fr)
-- [fkpcomposer](https://github.com/fkpcomposer): Brazilian Portuguese (pt_br)
-- [474FrediFred](https://github.com/474FrediFred): Swiss German (de_ch)
-- [bovae](https://github.com/bovae) & [b1twalker](https://github.com/b1twalker): Ukranian (uk)
-
-## License
-
-Copyright (C) 2026 nab138
-
-The source code of this repository is licensed under the MIT License. See the [LICENSE](/LICENSE) file for the full text.
-
-Branding, logos, media assets, and the name “iloader” are not licensed under the MIT License and are subject to separate restrictions.
-
-You may retain or use branding materials in forks, tutorials, or documentation if you include a clear link to either the official site (https://iloader.app) or the iloader source code repository (https://github.com/nab138/iloader) and do not imply official endorsement. See [LICENSE-BRANDING](/LICENSE-BRANDING) for full details.
+Translations of the new `expiry` section into other languages are especially welcome.
 
 ## Contributing
 
-Please read our [Contributing](/CONTRIBUTING.md) policy before making a contribution.
+Issues and pull requests are welcome. See [CONTRIBUTING.md](/CONTRIBUTING.md).
 
-## Future Plans
+## Credits
 
-iloader is currently being overhauled, see the [trello board](https://trello.com/b/hAe1LHTj/iloader) for more info!
+Klif is built on the work of many people.
+
+- [iloader](https://github.com/nab138/iloader) by [nab138](https://github.com/nab138): the app Klif is forked from
+- [isideload](https://github.com/nab138/isideload) by nab138, for installing apps, which builds on:
+  - [apple-codesign-quick](https://github.com/Dadoum/apple-codesign-quick) by [Dadoum](https://github.com/Dadoum), for code signing and entitlements
+  - [Impactor](https://github.com/claration/Impactor) by [claration](https://github.com/claration), as a reference for cryptography operations
+  - [Sideloader](https://github.com/Dadoum/Sideloader) by Dadoum, as a reference for Apple's private developer endpoints
+- [idevice](https://github.com/jkcoxson/idevice) by [jkcoxson](https://github.com/jkcoxson), for communicating with iOS devices, including reading provisioning profiles
+- [idevice_pair](https://github.com/jkcoxson/idevice_pair), as a reference for pairing file management
+- iloader's UI improvements by [StephenDev0](https://github.com/StephenDev0)
+- Built with [Tauri](https://tauri.app)
+
+The translations come from iloader's contributors: By3lish, TNT-333, basketshoe, baocreata, IamArayel, kkula9999, sibwaze, notmalicik, mirdukkkkk, okinaau, ChouChiu, marcinmajsc, ern775, canpng, jazoppix, eseiker, seomin0610, Ordyan777, kakik0u, lkspodmol, marcusherelammonstyle-cmd, MCI49312, Kynonim, DD00031, Toritan123, dleiferives, ShadowWLX, fkpcomposer, 474FrediFred, bovae and b1twalker. Thank you!
+
+## License
+
+The source code is licensed under the [MIT License](/LICENSE).
+
+- Copyright © 2025 nab138 (iloader)
+- Copyright © 2026 LeonardSEO (Klif modifications)
+
+The name "iloader" and iloader's logos are **not** covered by the MIT License. Klif uses its own name and logo, and mentions iloader only to credit the original project. See [LICENSE-BRANDING](/LICENSE-BRANDING) for iloader's branding terms.
