@@ -302,7 +302,6 @@
     "days_left_other": "{{count}} days left",
     "export_calendar": "Add reminders to calendar",
     "calendar_files": "Calendar Files",
-    "exporting": "Creating calendar file...",
     "exported_success_one": "Calendar file created with {{count}} reminder",
     "exported_success_other": "Calendar file created with {{count}} reminders",
     "failed_export": "Failed to create calendar file",

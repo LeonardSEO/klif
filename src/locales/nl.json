@@ -305,7 +305,6 @@
     "days_left_other": "Nog {{count}} dagen",
     "export_calendar": "Herinneringen in agenda zetten",
     "calendar_files": "Agendabestanden",
-    "exporting": "Agendabestand maken...",
     "exported_success_one": "Agendabestand gemaakt met {{count}} herinnering",
     "exported_success_other": "Agendabestand gemaakt met {{count}} herinneringen",
     "failed_export": "Kon agendabestand niet maken",

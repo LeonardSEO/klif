@@ -1,9 +1,9 @@
 import "./Certificates.css";
 import { invoke } from "@tauri-apps/api/core";
-import { save as saveFileDialog } from "@tauri-apps/plugin-dialog";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useError } from "../ErrorContext";
+import type { AppError } from "../errors";
 import { useTranslation } from "react-i18next";
 
 type ProfileInfo = {
@@ -53,21 +53,17 @@ export const Expiry = () => {
   }, [t]);
 
   const exportCalendar = useCallback(async () => {
-    const path = await saveFileDialog({
-      defaultPath: "sideload-expiry.ics",
-      filters: [{ name: t("expiry.calendar_files"), extensions: ["ics"] }],
-    });
-    if (!path) return;
-    const promise = invoke<number>("export_expiry_calendar", {
-      path,
-      titleTemplate: t("expiry.event_title", { name: "{name}" }),
-      description: t("expiry.event_description"),
-    });
-    toast.promise(promise, {
-      loading: t("expiry.exporting"),
-      success: (count) => t("expiry.exported_success", { count }),
-      error: (e) => err(t("expiry.failed_export"), e),
-    });
+    try {
+      const count = await invoke<number | null>("export_expiry_calendar", {
+        dialogTitle: t("expiry.export_calendar"),
+        filterName: t("expiry.calendar_files"),
+        titleTemplate: t("expiry.event_title", { name: "{name}" }),
+        description: t("expiry.event_description"),
+      });
+      if (count !== null) toast.success(t("expiry.exported_success", { count }));
+    } catch (e) {
+      toast.error(err(t("expiry.failed_export"), e as AppError));
+    }
   }, [t]);
 
   useEffect(() => {

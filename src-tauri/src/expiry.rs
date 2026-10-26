@@ -3,7 +3,8 @@ use std::time::SystemTime;
 use chrono::{DateTime, Duration, Utc};
 use idevice::{IdeviceService, misagent::MisagentClient};
 use serde::{Deserialize, Serialize};
-use tauri::State;
+use tauri::{AppHandle, State};
+use tauri_plugin_dialog::DialogExt;
 
 use crate::{
     device::{DeviceInfoMutex, get_provider},
@@ -59,18 +60,35 @@ pub async fn list_installed_profiles(
     Ok(profiles)
 }
 
+/// Asks where to save the calendar file, then writes it there. Returns the
+/// number of reminders, or `None` if the user cancelled the dialog.
 #[tauri::command]
 pub async fn export_expiry_calendar(
     device_state: State<'_, DeviceInfoMutex>,
-    path: String,
+    app: AppHandle,
+    dialog_title: String,
+    filter_name: String,
     title_template: String,
     description: String,
-) -> Result<usize, AppError> {
+) -> Result<Option<usize>, AppError> {
     let profiles = list_installed_profiles(device_state).await?;
     let (ics, count) = build_ics(&profiles, Utc::now(), &title_template, &description);
-    std::fs::write(&path, ics)
+
+    let save_path = app
+        .dialog()
+        .file()
+        .add_filter(filter_name, &["ics"])
+        .set_file_name("sideload-expiry.ics")
+        .set_title(dialog_title)
+        .blocking_save_file();
+
+    let Some(save_path) = save_path.as_ref().and_then(|p| p.as_path()) else {
+        return Ok(None);
+    };
+    tokio::fs::write(save_path, ics)
+        .await
         .map_err(|e| AppError::Filesystem("Failed to write calendar file".into(), e.to_string()))?;
-    Ok(count)
+    Ok(Some(count))
 }
 
 /// Provisioning profiles are CMS-signed blobs with an XML plist inside.
@@ -133,7 +151,7 @@ fn build_ics(
         let end = profile.expires + Duration::minutes(15);
 
         lines.push("BEGIN:VEVENT".into());
-        lines.push(format!("UID:{}@expiry-watch", profile.uuid));
+        lines.push(format!("UID:{}@expiry-watch", uid_safe(&profile.uuid)));
         lines.push(format!("DTSTAMP:{}", ics_time(now)));
         lines.push(format!("DTSTART:{}", ics_time(profile.expires)));
         lines.push(format!("DTEND:{}", ics_time(end)));
@@ -163,12 +181,35 @@ fn ics_time(t: DateTime<Utc>) -> String {
     t.format("%Y%m%dT%H%M%SZ").to_string()
 }
 
+/// Escapes TEXT values (RFC 5545 3.3.11). App names come from profiles on
+/// the device, so any line break or other control character is neutralised
+/// to keep it from starting a new property.
 fn escape(text: &str) -> String {
-    text.replace('\\', "\\\\")
-        .replace(';', "\\;")
-        .replace(',', "\\,")
-        .replace("\r\n", "\\n")
-        .replace('\n', "\\n")
+    let mut out = String::with_capacity(text.len());
+    let mut chars = text.chars().peekable();
+    while let Some(c) = chars.next() {
+        match c {
+            '\\' => out.push_str("\\\\"),
+            ';' => out.push_str("\\;"),
+            ',' => out.push_str("\\,"),
+            '\r' => {
+                if chars.peek() == Some(&'\n') {
+                    chars.next();
+                }
+                out.push_str("\\n");
+            }
+            '\n' => out.push_str("\\n"),
+            c if c.is_control() => {}
+            c => out.push(c),
+        }
+    }
+    out
+}
+
+fn uid_safe(uuid: &str) -> String {
+    uuid.chars()
+        .filter(|c| c.is_ascii_alphanumeric() || *c == '-')
+        .collect()
 }
 
 /// RFC 5545 lines must not exceed 75 octets; longer lines continue on the
@@ -261,6 +302,19 @@ mod tests {
     #[test]
     fn escapes_special_characters() {
         assert_eq!(escape("a,b;c\\d\ne"), "a\\,b\\;c\\\\d\\ne");
+    }
+
+    #[test]
+    fn neutralises_line_breaks_and_control_characters() {
+        assert_eq!(escape("a\rb\r\nc\u{7}d"), "a\\nb\\ncd");
+        let now = Utc.with_ymd_and_hms(2026, 10, 26, 12, 0, 0).unwrap();
+        let mut evil = profile("x\r\nATTENDEE:mailto:a@b.c", "App\rDTSTART:19700101T000000Z", now + Duration::days(2));
+        evil.app_id_name = Some(evil.name.clone());
+        let (ics, _) = build_ics(&[evil], now, "{name}", "d");
+        assert!(ics.contains("UID:xATTENDEEmailtoabc@expiry-watch\r\n"));
+        assert!(!ics.contains("\r\nATTENDEE"));
+        assert!(!ics.contains("\r\nDTSTART:19700101"));
+        assert!(!ics.replace("\r\n", "").contains('\r'));
     }
 
     #[test]
