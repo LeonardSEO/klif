@@ -42,7 +42,7 @@ jobs:
             args: "--bundles rpm"
           - platform: "windows-latest"
             args: ""
-          - platform: "macos-latest"
+          - platform: "macos-15-intel"
             args: "--target universal-apple-darwin"
 
     runs-on: ${{ matrix.platform }}
@@ -64,7 +64,7 @@ jobs:
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+          targets: ${{ matrix.platform == 'macos-15-intel' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
       - name: Install Linux dependencies
         if: matrix.platform == 'ubuntu-22.04' || matrix.platform == 'ubuntu-22.04-arm'
@@ -89,11 +89,11 @@ jobs:
         run: bun i --frozen-lockfile
 
       - name: Clean old bundles
-        if: matrix.platform != 'macos-latest'
+        if: matrix.platform != 'macos-15-intel'
         run: bunx rimraf src-tauri/target/release/bundle
 
       - name: Clean old bundles
-        if: matrix.platform == 'macos-latest'
+        if: matrix.platform == 'macos-15-intel'
         run: |
           bunx rimraf src-tauri/target/aarch64-apple-darwin/release/bundle
           bunx rimraf src-tauri/target/x86_64-apple-darwin/release/bundle
@@ -105,15 +105,17 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
         run: |
           if [ "${{ github.event_name }}" = "release" ]; then
             echo "id=${{ github.event.release.id }}" >> "$GITHUB_OUTPUT"
           else
-            echo "id=$(gh api repos/${{ github.repository }}/releases/tags/${{ inputs.release_tag }} -q .id)" >> "$GITHUB_OUTPUT"
+            RELEASE_ID=$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$RELEASE_TAG" -q .id)
+            echo "id=$RELEASE_ID" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Export Apple signing secrets (release only)
-        if: matrix.platform == 'macos-latest' && env.HAVE_SIGNING_SECRETS == 'true' && env.IS_RELEASE == 'true'
+        if: matrix.platform == 'macos-15-intel' && env.HAVE_SIGNING_SECRETS == 'true' && env.IS_RELEASE == 'true'
         run: |
           echo "APPLE_CERTIFICATE=${{ secrets.DEV_ID_P12_BASE64 }}" >> $GITHUB_ENV
           echo "APPLE_CERTIFICATE_PASSWORD=${{ secrets.DEV_ID_P12_PASSWORD }}" >> $GITHUB_ENV
@@ -133,7 +135,7 @@ jobs:
           assetNamePattern: "[name]-[platform]-[arch][ext]"
 
       - name: Notarize & Staple DMG (release only)
-        if: matrix.platform == 'macos-latest' && env.HAVE_NOTARIZE_SECRETS == 'true' && env.IS_RELEASE == 'true'
+        if: matrix.platform == 'macos-15-intel' && env.HAVE_NOTARIZE_SECRETS == 'true' && env.IS_RELEASE == 'true'
         run: |
           DMG_PATH=$(find src-tauri/target -name "*.dmg" -print -quit)
           if [ -z "$DMG_PATH" ]; then
@@ -150,9 +152,10 @@ jobs:
 
       - name: Upload macOS DMG
         uses: actions/upload-artifact@v7
-        if: matrix.platform == 'macos-latest'
+        if: matrix.platform == 'macos-15-intel'
         with:
           name: macos-dmg-universal
+          if-no-files-found: error
           path: ${{ github.workspace }}/src-tauri/target/**/release/bundle/**/*.dmg
 
       - name: Upload Linux DEB
